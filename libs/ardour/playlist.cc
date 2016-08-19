@@ -2318,9 +2318,7 @@ Playlist::state (bool full_state)
 	node->add_property (X_("id"), id().to_s());
 	node->add_property (X_("name"), _name);
 	node->add_property (X_("type"), _type.to_string());
-
-	_orig_track_id.print (buf, sizeof (buf));
-	node->add_property (X_("orig-track-id"), buf);
+	node->add_property (X_("orig-track-id"), _orig_track_id.to_s ());
 	node->add_property (X_("frozen"), _frozen ? "yes" : "no");
 
 	if (full_state) {
