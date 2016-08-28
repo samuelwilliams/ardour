@@ -24,6 +24,7 @@
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 #include "pbd/strsplit.h"
+#include "pbd/types_convert.h"
 #include "pbd/debug.h"
 
 #include "ardour/amp.h"
@@ -235,7 +236,7 @@ RouteGroup::get_state ()
 {
 	XMLNode *node = new XMLNode ("RouteGroup");
 
-	node->add_property ("id", id().to_s());
+	node->set_property ("id", id());
 
 	add_properties (*node);
 
@@ -246,7 +247,7 @@ RouteGroup::get_state ()
 			str << (*i)->id () << ' ';
 		}
 
-		node->add_property ("routes", str.str());
+		node->set_property ("routes", str.str());
 	}
 
 	return *node;
@@ -259,13 +260,12 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-	XMLProperty const * prop;
-
 	set_id (node);
 	set_values (node);
 
-	if ((prop = node.property ("routes")) != 0) {
-		stringstream str (prop->value());
+	std::string routes;
+	if (node.get_property ("routes", routes)) {
+		stringstream str (routes);
 		vector<string> ids;
 		split (str.str(), ids, ' ');
 
