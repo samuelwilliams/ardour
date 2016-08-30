@@ -61,6 +61,7 @@
 #include "ardour_button.h"
 #include "audio_streamview.h"
 #include "debug.h"
+#include "enums_convert.h"
 #include "route_time_axis.h"
 #include "automation_time_axis.h"
 #include "enums.h"
@@ -154,9 +155,9 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	gm.get_level_meter().setup_meters(50, meter_width);
 	gm.update_gain_sensitive ();
 
-	string str = gui_property ("height");
-	if (!str.empty()) {
-		set_height (atoi (str));
+	uint32_t height;
+	if (get_gui_property ("height", height)) {
+		set_height (height);
 	} else {
 		set_height (preset_height (HeightNormal));
 	}
@@ -302,9 +303,9 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_track()) {
 
-		str = gui_property ("layer-display");
-		if (!str.empty()) {
-			set_layer_display (LayerDisplay (string_2_enum (str, _view->layer_display ())));
+		LayerDisplay layer_display;
+		if (get_gui_property ("layer-display", layer_display)) {
+			set_layer_display (layer_display);
 		}
 
 		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::map_frozen, this), gui_context());
@@ -1895,7 +1896,8 @@ RouteTimeAxisView::update_gain_track_visibility ()
 {
 	bool const showit = gain_automation_item->get_active();
 
-	if (showit != string_is_affirmative (gain_track->gui_property ("visible"))) {
+	bool visible;
+	if (gain_track->get_gui_property ("visible", visible) && visible != showit) {
 		gain_track->set_marked_for_display (showit);
 
 		/* now trigger a redisplay */
@@ -1911,7 +1913,8 @@ RouteTimeAxisView::update_trim_track_visibility ()
 {
 	bool const showit = trim_automation_item->get_active();
 
-	if (showit != string_is_affirmative (trim_track->gui_property ("visible"))) {
+	bool visible;
+	if (trim_track->get_gui_property ("visible", visible) && visible != showit) {
 		trim_track->set_marked_for_display (showit);
 
 		/* now trigger a redisplay */
@@ -1927,7 +1930,8 @@ RouteTimeAxisView::update_mute_track_visibility ()
 {
 	bool const showit = mute_automation_item->get_active();
 
-	if (showit != string_is_affirmative (mute_track->gui_property ("visible"))) {
+	bool visible;
+	if (mute_track->get_gui_property ("visible", visible) && visible != showit) {
 		mute_track->set_marked_for_display (showit);
 
 		/* now trigger a redisplay */
@@ -2268,9 +2272,9 @@ RouteTimeAxisView::add_automation_child (Evoral::Parameter param, boost::shared_
 	_automation_tracks[param] = track;
 
 	/* existing state overrides "show" argument */
-	string s = track->gui_property ("visible");
-	if (!s.empty()) {
-		show = string_is_affirmative (s);
+	bool visible;
+	if (track->get_gui_property ("visible", visible)) {
+		show = visible;
 	}
 
 	/* this might or might not change the visibility status, so don't rely on it */
@@ -2513,7 +2517,7 @@ RouteTimeAxisView::set_layer_display (LayerDisplay d, bool apply_to_selection)
 			_view->set_layer_display (d);
 		}
 
-		set_gui_property (X_("layer-display"), enum_2_string (d));
+		set_gui_property (X_("layer-display"), d);
 	}
 }
 
