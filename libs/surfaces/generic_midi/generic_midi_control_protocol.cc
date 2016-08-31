@@ -860,7 +860,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	}
 
 	if ((prop = node.property (X_("momentary"))) != 0) {
-		momentary = string_is_affirmative (prop->value());
+		momentary = string_to<bool> (prop->value());
 	} else {
 		momentary = false;
 	}
