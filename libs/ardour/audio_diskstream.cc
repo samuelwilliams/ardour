@@ -1900,7 +1900,6 @@ XMLNode&
 AudioDiskstream::get_state ()
 {
 	XMLNode& node (Diskstream::get_state());
-	LocaleGuard lg;
 
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	node.set_property ("channels", c->size());
@@ -1938,7 +1937,6 @@ AudioDiskstream::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	XMLNode* capture_pending_node = 0;
-	LocaleGuard lg;
 
 	/* prevent write sources from being created */
 
