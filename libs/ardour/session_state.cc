@@ -1021,7 +1021,6 @@ Session::load_state (string snapshot_name)
 int
 Session::load_options (const XMLNode& node)
 {
-	LocaleGuard lg;
 	config.set_variables (node);
 	return 0;
 }
@@ -1054,7 +1053,6 @@ Session::get_template()
 XMLNode&
 Session::state (bool full_state)
 {
-	LocaleGuard lg;
 	XMLNode* node = new XMLNode("Session");
 	XMLNode* child;
 
@@ -1328,7 +1326,6 @@ Session::get_control_protocol_state ()
 int
 Session::set_state (const XMLNode& node, int version)
 {
-	LocaleGuard lg;
 	XMLNodeList nlist;
 	XMLNode* child;
 	int ret = -1;
