@@ -111,6 +111,8 @@ protected:
 	std::string presets_file () const;
 	void find_presets ();
 
+	std::string get_preset_string (int num) const;
+
 	VSTHandle* _handle;
 	VSTState*  _state;
 	AEffect*   _plugin;

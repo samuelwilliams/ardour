@@ -464,7 +464,7 @@ VSTPlugin::do_save_preset (string name)
 
 	XMLNode* p = 0;
 	/* XXX: use of _presets.size() + 1 for the unique ID here is dubious at best */
-	string const uri = string_compose (X_("VST:%1:%2"), unique_id (), _presets.size() + 1);
+	string const uri = get_preset_string (_presets.size() + 1);
 
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
@@ -723,7 +723,7 @@ VSTPlugin::find_presets ()
 
 	int const vst_version = _plugin->dispatcher (_plugin, effGetVstVersion, 0, 0, NULL, 0);
 	for (int i = 0; i < _plugin->numPrograms; ++i) {
-		PresetRecord r (string_compose (X_("VST:%1:%2"), unique_id (), i), "", false);
+		PresetRecord r (get_preset_string(i), "", false);
 
 		if (vst_version >= 2) {
 			char buf[256];
@@ -758,6 +758,13 @@ VSTPlugin::find_presets ()
 		}
 	}
 
+}
+
+std::string
+VSTPlugin::get_preset_string (int num) const
+{
+	std::string const preset_string = X_("VST:") + unique_id () + ":" + to_string (num);
+	return preset_string;
 }
 
 /** @return XMLTree with our user presets; could be a new one if no existing
