@@ -59,7 +59,6 @@ MacVSTPlugin::MacVSTPlugin (const MacVSTPlugin &other)
 	_plugin = _state->plugin;
 
 	XMLNode* root = new XMLNode (other.state_node_name ());
-	LocaleGuard lg;
 	other.add_state (root);
 	set_state (*root, Stateful::loading_state_version);
 	delete root;
