@@ -23,6 +23,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/region_factory.h"
 #include "ardour/progress.h"
+#include "ardour/types_convert.h"
 
 using namespace ARDOUR;
 

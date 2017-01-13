@@ -51,6 +51,7 @@
 #include "ardour/linux_vst_support.h"
 #include "ardour/mac_vst_support.h"
 #include "ardour/plugin_types.h"
+#include "ardour/types_convert.h"
 #include "ardour/vst_info_file.h"
 
 #include "pbd/i18n.h"

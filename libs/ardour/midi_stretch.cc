@@ -25,6 +25,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_stretch.h"
 #include "ardour/types.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 

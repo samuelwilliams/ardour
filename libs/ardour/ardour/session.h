@@ -73,6 +73,7 @@
 #include "ardour/presentation_info.h"
 #include "ardour/route.h"
 #include "ardour/route_graph.h"
+#include "ardour/types_convert.h"
 
 
 class XMLTree;

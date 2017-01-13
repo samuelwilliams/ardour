@@ -24,6 +24,7 @@
 
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_playlist_source.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 

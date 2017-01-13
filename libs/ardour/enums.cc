@@ -39,6 +39,7 @@
 #include "ardour/tempo.h"
 #include "ardour/track.h"
 #include "ardour/types.h"
+#include "ardour/types_convert.h"
 
 using namespace std;
 using namespace PBD;

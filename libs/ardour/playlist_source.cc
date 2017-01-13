@@ -33,6 +33,7 @@
 #include "ardour/playlist.h"
 #include "ardour/playlist_source.h"
 #include "ardour/playlist_factory.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 

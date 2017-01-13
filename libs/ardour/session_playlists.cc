@@ -23,6 +23,7 @@
 #include "ardour/playlist_factory.h"
 #include "ardour/session_playlists.h"
 #include "ardour/track.h"
+#include "ardour/types_convert.h"
 #include "pbd/i18n.h"
 #include "pbd/compose.h"
 #include "pbd/xml++.h"
