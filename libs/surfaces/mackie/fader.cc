@@ -22,6 +22,7 @@
 #include "pbd/compose.h"
 
 #include "ardour/debug.h"
+#include "ardour/types_convert.h"
 
 #include "fader.h"
 #include "surface.h"
