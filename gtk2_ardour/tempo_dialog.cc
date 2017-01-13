@@ -21,6 +21,8 @@
 
 #include <gtkmm/stock.h>
 
+#include "ardour/types_convert.h"
+
 #include "gtkmm2ext/utils.h"
 
 #include "tempo_dialog.h"

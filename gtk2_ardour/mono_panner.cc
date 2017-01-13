@@ -37,6 +37,7 @@
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
+#include "ardour/types_convert.h"
 
 #include "mono_panner.h"
 #include "mono_panner_editor.h"

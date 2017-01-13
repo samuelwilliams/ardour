@@ -27,6 +27,7 @@
 
 #include "ardour/audioregion.h"
 #include "ardour/session_event.h"
+#include "ardour/types_convert.h"
 #include "ardour/dB.h"
 
 #include "audio_region_editor.h"

@@ -22,6 +22,8 @@
 #include "sys_ex.h"
 #include "ui_config.h"
 
+#include "ardour/types_convert.h"
+
 using namespace std;
 
 SysEx::SysEx (

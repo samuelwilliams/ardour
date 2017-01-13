@@ -26,6 +26,8 @@
 #include "pbd/windows_special_dirs.h"
 #endif
 
+#include "ardour/types_convert.h"
+
 #include "pbd/file_utils.h"
 #include "ui_config.h"
 #include "video_tool_paths.h"

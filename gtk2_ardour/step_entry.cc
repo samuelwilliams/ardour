@@ -25,6 +25,7 @@
 #include "gtkmm2ext/keyboard.h"
 
 #include "ardour/filesystem_paths.h"
+#include "ardour/types_convert.h"
 
 #include "midi_channel_selector.h"
 #include "midi_time_axis.h"

@@ -39,6 +39,7 @@
 #include "tooltips.h"
 #include "ui_config.h"
 
+#include "ardour/types_convert.h"
 #include "pbd/i18n.h"
 
 #define BASELINESTRETCH (1.25)

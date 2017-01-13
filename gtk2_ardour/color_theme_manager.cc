@@ -33,6 +33,7 @@
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
+#include "ardour/types_convert.h"
 
 #include "canvas/container.h"
 #include "canvas/rectangle.h"

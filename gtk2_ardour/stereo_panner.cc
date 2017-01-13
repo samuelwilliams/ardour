@@ -36,6 +36,7 @@
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
+#include "ardour/types_convert.h"
 
 #include "canvas/colors.h"
 

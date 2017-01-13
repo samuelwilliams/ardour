@@ -23,6 +23,8 @@
 
 #include <gtkmm/toggleaction.h>
 
+#include "ardour/types_convert.h"
+
 #include "pbd/compose.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
