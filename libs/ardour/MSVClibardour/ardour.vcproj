@@ -1404,15 +1404,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\vst_state.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\vst_info_file.cc"
 				>
 			</File>
 			<File
 				RelativePath="..\vst_plugin.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\vst_state.cc"
 				>
 			</File>
 			<File
@@ -2467,6 +2467,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\types.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\types_convert.h"
 				>
 			</File>
 			<File
