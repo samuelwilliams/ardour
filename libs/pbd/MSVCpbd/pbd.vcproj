@@ -439,6 +439,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\string_convert.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\strreplace.cc"
 				>
 			</File>
@@ -661,6 +665,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pbd\enum_convert.h"
+				>
+			</File>
+			<File
 				RelativePath="..\pbd\ffs.h"
 				>
 			</File>
@@ -789,6 +797,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pbd\string_convert.h"
+				>
+			</File>
+			<File
 				RelativePath="..\pbd\system_exec.h"
 				>
 			</File>
@@ -814,6 +826,10 @@
 			</File>
 			<File
 				RelativePath="..\pbd\transmitter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\pbd\types_convert.h"
 				>
 			</File>
 			<File
