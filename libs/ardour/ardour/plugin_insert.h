@@ -37,6 +37,20 @@
 #include "ardour/sidechain.h"
 #include "ardour/automation_control.h"
 
+#define PI_LUAMODULATE // prototype
+
+#ifdef PI_LUAMODULATE
+
+#include "ardour/luascripting.h"
+#include "pbd/reallocpool.h"
+#include "lua/luastate.h"
+
+namespace luabridge {
+	class LuaRef;
+}
+
+#endif
+
 class XMLNode;
 
 namespace ARDOUR {
@@ -109,6 +123,13 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 #ifdef MIXBUS
 	bool is_channelstrip () const;
+#endif
+
+#ifdef PI_LUAMODULATE
+	bool load_modulation_script (const std::string&);
+	void unload_modulation_script ();
+	bool modulation_script_loaded () const;
+	std::string modulation_script () const;
 #endif
 
 	void set_input_map (uint32_t, ChanMapping);
@@ -195,11 +216,13 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 		double get_value (void) const;
 		void catch_up_with_external_value (double val);
+		void modulate_to (double val);
 		XMLNode& get_state();
 
 	private:
 		PluginInsert* _plugin;
 		void actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
+		void set_plugin_parameters (double val);
 	};
 
 	/** A control that manipulates a plugin property (message). */
@@ -376,6 +399,15 @@ class LIBARDOUR_API PluginInsert : public Processor
 	uint32_t _bypass_port;
 
 	void preset_load_set_value (uint32_t, float);
+
+#ifdef PI_LUAMODULATE
+	PBD::ReallocPool _mempool;
+	LuaState _lua;
+	luabridge::LuaRef* _lua_modulate;
+	std::string _script;
+	Glib::Threads::Mutex _lua_lock;
+	void lua_print (std::string s);
+#endif
 };
 
 } // namespace ARDOUR

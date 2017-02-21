@@ -494,6 +494,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginWSPtrClass <Evoral::Control> ("Control")
+		.addCast<AutomationControl> ("to_automationcontrol")
 		.addFunction ("list", (boost::shared_ptr<Evoral::ControlList>(Evoral::Control::*)())&Evoral::Control::list)
 		.endClass ()
 
@@ -503,6 +504,9 @@ LuaBindings::common (lua_State* L)
 		.addData ("upper", &Evoral::ParameterDescriptor::upper)
 		.addData ("normal", &Evoral::ParameterDescriptor::normal)
 		.addData ("toggled", &Evoral::ParameterDescriptor::toggled)
+		.endClass ()
+
+		.beginStdMap <Evoral::Parameter, boost::shared_ptr<Evoral::Control> > ("ControlMap")
 		.endClass ()
 
 		.beginClass <Evoral::Range<framepos_t> > ("Range")
@@ -1281,10 +1285,17 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("natural_output_streams", &PluginInsert::natural_output_streams)
 		.addFunction ("natural_input_streams", &PluginInsert::natural_input_streams)
 		.addFunction ("reset_parameters_to_default", &PluginInsert::reset_parameters_to_default)
+#ifdef PI_LUAMODULATE
+		.addFunction ("load_modulation_script", &PluginInsert::load_modulation_script)
+		.addFunction ("unload_modulation_script", &PluginInsert::unload_modulation_script)
+		.addFunction ("modulation_script_loaded", &PluginInsert::modulation_script_loaded)
+		.addFunction ("modulation_script", &PluginInsert::modulation_script)
+#endif
 		.endClass ()
 
 		.deriveWSPtrClass <AutomationControl, PBD::Controllable> ("AutomationControl")
 		.addCast<Evoral::Control> ("to_ctrl")
+		.addCast<PluginInsert::PluginControl> ("to_plugincontrol")
 		.addFunction ("automation_state", &AutomationControl::automation_state)
 		.addFunction ("automation_style", &AutomationControl::automation_style)
 		.addFunction ("set_automation_state", &AutomationControl::set_automation_state)
@@ -1379,6 +1390,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <PluginInsert::PluginControl, AutomationControl> ("PluginControl")
+		.addFunction ("modulate_to", &PluginInsert::PluginControl::modulate_to)
 		.endClass ()
 
 		.deriveWSPtrClass <AudioSource, Source> ("AudioSource")
