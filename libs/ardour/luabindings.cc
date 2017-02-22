@@ -1285,12 +1285,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("natural_output_streams", &PluginInsert::natural_output_streams)
 		.addFunction ("natural_input_streams", &PluginInsert::natural_input_streams)
 		.addFunction ("reset_parameters_to_default", &PluginInsert::reset_parameters_to_default)
-#ifdef PI_LUAMODULATE
 		.addFunction ("load_modulation_script", &PluginInsert::load_modulation_script)
 		.addFunction ("unload_modulation_script", &PluginInsert::unload_modulation_script)
 		.addFunction ("modulation_script_loaded", &PluginInsert::modulation_script_loaded)
 		.addFunction ("modulation_script", &PluginInsert::modulation_script)
-#endif
 		.endClass ()
 
 		.deriveWSPtrClass <AutomationControl, PBD::Controllable> ("AutomationControl")

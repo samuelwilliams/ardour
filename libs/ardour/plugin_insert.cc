@@ -38,10 +38,8 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/port.h"
 
-#ifdef PI_LUAMODULATE
 #include "LuaBridge/LuaBridge.h"
 #include "ardour/luabindings.h"
-#endif
 
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
@@ -88,11 +86,10 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _maps_from_state (false)
 	, _latency_changed (false)
 	, _bypass_port (UINT32_MAX)
-#ifdef PI_LUAMODULATE
 	, _mempool ("LuaModulator", 3145728)
 	, _lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 	, _lua_modulate (0)
-#endif
+	, _modscript_proxy (0)
 {
 	/* the first is the master */
 
@@ -104,7 +101,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 			add_sidechain (sc.n_audio (), sc.n_midi ());
 		}
 	}
-#ifdef PI_LUAMODULATE
+
 	_lua.tweak_rt_gc ();
 	_lua.Print.connect (sigc::mem_fun (*this, &PluginInsert::lua_print));
 
@@ -119,19 +116,13 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 
 	// sandbox
 	_lua.do_command ("io = nil os = nil loadfile = nil require = nil dofile = nil package = nil debug = nil");
-
-#endif
 }
 
 PluginInsert::~PluginInsert ()
 {
-#ifdef PI_LUAMODULATE
 	_lua.do_command ("collectgarbage();");
 	delete (_lua_modulate);
-#endif
 }
-
-#ifdef PI_LUAMODULATE
 
 void
 PluginInsert::lua_print (std::string s) {
@@ -166,6 +157,9 @@ PluginInsert::load_modulation_script (const std::string& s)
 	_lua_modulate = new luabridge::LuaRef (lua_modulate);
 	_script = s;
 
+	lm.release ();
+	ModulationScriptChanged (); /* EMIT SIGNAL */
+
 	return true;
 }
 
@@ -177,6 +171,7 @@ PluginInsert::unload_modulation_script ()
 		_lua_modulate = 0;
 	}
 	_script = "";
+	ModulationScriptChanged (); /* EMIT SIGNAL */
 }
 
 bool
@@ -191,9 +186,8 @@ PluginInsert::modulation_script () const
 	if (_lua_modulate) {
 		return _script;
 	}
-	return "--example to come";
+	return "function dsp_modulate(ctrl, bufs, n_samples, offset, start)\n\nend";
 }
-#endif
 
 void
 PluginInsert::set_strict_io (bool b)
@@ -884,7 +878,6 @@ PluginInsert::connect_and_run (BufferSet& bufs, framepos_t start, framepos_t end
 		}
 	}
 
-#ifdef PI_LUAMODULATE
 	if (_lua_modulate) {
 		Glib::Threads::Mutex::Lock lm (_lua_lock, Glib::Threads::TRY_LOCK);
 		if (lm.locked()) {
@@ -894,13 +887,15 @@ PluginInsert::connect_and_run (BufferSet& bufs, framepos_t start, framepos_t end
 			} catch (luabridge::LuaException const& e) {
 				_lua_modulate = 0;
 				_script = "";
+
+				lm.release ();
+				ModulationScriptChanged (); /* EMIT SIGNAL */
 #ifndef NDEBUG
 				std::cerr << "LuaException: " << e.what () << "\n";
 #endif
 			}
 		}
 	}
-#endif
 
 	/* Calculate if, and how many frames we need to collect for analysis */
 	framecnt_t collect_signal_nframes = (_signal_analysis_collect_nframes_max -
@@ -2435,7 +2430,6 @@ PluginInsert::state (bool full)
 		node.add_child_nocopy (_sidechain->state (full));
 	}
 
-#ifdef PI_LUAMODULATE
 	if (!_script.empty()) {
 		gchar* b64 = g_base64_encode ((const guchar*)_script.c_str (), _script.size ());
 		std::string b64s (b64);
@@ -2445,7 +2439,6 @@ PluginInsert::state (bool full)
 		script_node->add_content (b64s);
 		node.add_child_nocopy (*script_node);
 	}
-#endif
 
 	_plugins[0]->set_insert_id(this->id());
 	node.add_child_nocopy (_plugins[0]->get_state());
@@ -2753,7 +2746,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			}
 		}
 
-#ifdef PI_LUAMODULATE
 		if ((*i)->name () == X_("script")) {
 			for (XMLNodeList::const_iterator n = (*i)->children ().begin (); n != (*i)->children ().end (); ++n) {
 				if (!(*n)->is_content ()) { continue; }
@@ -2764,7 +2756,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 				break;
 			}
 		}
-#endif
 	}
 
 	if (in_maps == out_maps && out_maps >0 && out_maps == get_count()) {
