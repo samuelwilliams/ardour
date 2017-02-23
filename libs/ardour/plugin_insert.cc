@@ -87,7 +87,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _latency_changed (false)
 	, _bypass_port (UINT32_MAX)
 	, _mempool ("LuaModulator", 3145728)
-	, _lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
+	, _lua (0)
 	, _lua_modulate (0)
 	, _modscript_proxy (0)
 {
@@ -101,12 +101,32 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 			add_sidechain (sc.n_audio (), sc.n_midi ());
 		}
 	}
+	reinit_lua ();
+}
 
-	_lua.tweak_rt_gc ();
-	_lua.Print.connect (sigc::mem_fun (*this, &PluginInsert::lua_print));
+PluginInsert::~PluginInsert ()
+{
+	delete _lua_modulate;
+	delete _lua;
+}
+
+void
+PluginInsert::reinit_lua ()
+{
+	delete _lua_modulate;
+	delete _lua;
+#ifdef RAP_WITH_CALL_STATS
+	assert (_mempool->mem_used () == 0);
+#endif
+	_lua_modulate = 0;
+	_lua = new LuaState (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool));
+
+
+	_lua->tweak_rt_gc ();
+	_lua->Print.connect (sigc::mem_fun (*this, &PluginInsert::lua_print));
 
 	// register session object
-	lua_State* L = _lua.getState ();
+	lua_State* L = _lua->getState ();
 	LuaBindings::stddef (L);
 	LuaBindings::common (L);
 	LuaBindings::dsp (L);
@@ -115,13 +135,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	lua_setglobal (L, "Session");
 
 	// sandbox
-	_lua.do_command ("io = nil os = nil loadfile = nil require = nil dofile = nil package = nil debug = nil");
-}
-
-PluginInsert::~PluginInsert ()
-{
-	_lua.do_command ("collectgarbage();");
-	delete (_lua_modulate);
+	_lua->do_command ("io = nil os = nil loadfile = nil require = nil dofile = nil package = nil debug = nil");
 }
 
 void
@@ -141,14 +155,15 @@ PluginInsert::load_modulation_script (const std::string& s)
 	}
 
 	Glib::Threads::Mutex::Lock lm (_lua_lock);
+	reinit_lua ();
 
-	lua_State* L = _lua.getState ();
+	lua_State* L = _lua->getState ();
 
 	luabridge::LuaRef load = luabridge::getGlobal (L, "load");
-	_lua.do_command ("f = nil");
+	_lua->do_command ("f = nil");
 	load (bytecode)(); // assigns f = "bytecode"
-	_lua.do_command ("assert (type (f) == 'string') dsp_modulate = load(f) f = nil"); // assigns dsp_modulate
-
+	_lua->do_command ("assert (type (f) == 'string') dsp_modulate = load(f) f = nil"); // assigns dsp_modulate
+	// consider just loading the script (globals and all)
 	luabridge::LuaRef lua_modulate = luabridge::getGlobal (L, "dsp_modulate");
 	if (lua_modulate.type () != LUA_TFUNCTION) {
 		return false;
@@ -186,7 +201,43 @@ PluginInsert::modulation_script () const
 	if (_lua_modulate) {
 		return _script;
 	}
-	return "function dsp_modulate(ctrl, bufs, n_samples, offset, start)\n\nend";
+	return
+		"--  EXAMPLE MODULATION SCRIPT --\n"
+		"\n"
+		"-- modulation callback, this function is called every process\n"
+		"-- cycle befor running the plugin\n"
+		"function dsp_modulate (ctrl, bufs, n_samples, offset, start)\n"
+		"\n"
+		"	init = init or 0 if init == 0 then init = 1\n"
+		"		-- one time initialization code, persistent setup\n"
+		"\n"
+		"		-- query session sample-rate, store in global variable\n"
+		"		samplerate = Session:nominal_frame_rate ()\n"
+		"\n"
+		"		-- create an envelope follower, 100ms rise, 2sec fall time\n"
+		"		env = ARDOUR.DSP.EnvFollower (samplerate, 100, 2000)\n"
+		"\n"
+		"	  -- initialize a counter for a LFO\n"
+		"		lfo = 0\n"
+		"\n"
+		"	end\n"
+		"\n"
+		"\n"
+		"	-- feed the envelope follower with data from the 1st audio input\n"
+		"	env:process_bufs (bufs, 0 --[[ input buffer 0..N ]], n_samples, offset)\n"
+		"\n"
+		"	-- set the plugin's 1st input to 10 times the envelope-value\n"
+		"	ARDOUR.LuaAPI.set_control (ctrl, 0 --[[plugin control port 0..N]], 10 * env:value())\n"
+		"\n"
+		"	-- LFO 1 second period (1 sec = sample-rate number of samples)\n"
+		"	lfo = lfo + n_samples\n"
+		"	if lfo > samplerate then lfo = lfo - samplerate end -- wrap around\n"
+		"	local val = math.sin (2 * math.pi * lfo / samplerate); -- use a sine OSC [-1...1]\n"
+		"\n"
+		"	-- set the plugin's 2nd input to the LFO 0..1\n"
+		"	ARDOUR.LuaAPI.set_control (ctrl, 1 --[[plugin control port 0..N]], 0.5 * val * 0.5)\n"
+		"\n"
+		"end";
 }
 
 void
@@ -883,7 +934,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, framepos_t start, framepos_t end
 		if (lm.locked()) {
 			try {
 				(*_lua_modulate) (controls(), &bufs, nframes, offset, start);
-				_lua.collect_garbage_step ();
+				_lua->collect_garbage_step ();
 			} catch (luabridge::LuaException const& e) {
 				_lua_modulate = 0;
 				_script = "";

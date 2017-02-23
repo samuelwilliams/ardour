@@ -398,8 +398,9 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	void preset_load_set_value (uint32_t, float);
 
+	void reinit_lua();
 	PBD::ReallocPool _mempool;
-	LuaState _lua;
+	LuaState* _lua;
 	luabridge::LuaRef* _lua_modulate;
 	std::string _script;
 	Glib::Threads::Mutex _lua_lock;

@@ -820,3 +820,38 @@ LuaAPI::new_noteptr (uint8_t chan, Evoral::Beats beat_time, Evoral::Beats length
 {
 	return boost::shared_ptr<Evoral::Note<Evoral::Beats> > (new Evoral::Note<Evoral::Beats>(chan, beat_time, length, note, velocity));
 }
+
+/* modulation related */
+
+bool
+LuaAPI::set_control (const Evoral::ControlSet::Controls& ctrlmap, uint32_t port, double value)
+{
+	Evoral::Parameter p (AutomationType::PluginAutomation, 0, port);
+	Evoral::ControlSet::Controls::const_iterator i = ctrlmap.find (p);
+	if (i == ctrlmap.end()) {
+		return false;
+	}
+	boost::shared_ptr<PluginInsert::PluginControl> c = boost::dynamic_pointer_cast<PluginInsert::PluginControl> (i->second);
+	if (!c) {
+		return false;
+	}
+	// c->interface_to_internal
+	value = std::min (c->upper(), std::max (c->lower(), value));
+	c->modulate_to (value);
+	return true;
+}
+
+double
+LuaAPI::control_value (const Evoral::ControlSet::Controls& ctrlmap, uint32_t port)
+{
+	Evoral::Parameter p (AutomationType::PluginAutomation, 0, port);
+	Evoral::ControlSet::Controls::const_iterator i = ctrlmap.find (p);
+	if (i == ctrlmap.end()) {
+		return 0;
+	}
+	boost::shared_ptr<PluginInsert::PluginControl> c = boost::dynamic_pointer_cast<PluginInsert::PluginControl> (i->second);
+	if (!c) {
+		return 0;
+	}
+	return c->get_value ();
+}

@@ -1951,6 +1951,9 @@ LuaBindings::common (lua_State* L)
 		.addCFunction ("sample_to_timecode", ARDOUR::LuaAPI::sample_to_timecode)
 		.addCFunction ("timecode_to_sample", ARDOUR::LuaAPI::timecode_to_sample)
 
+		.addFunction ("control_value", ARDOUR::LuaAPI::control_value)
+		.addFunction ("set_control", ARDOUR::LuaAPI::set_control)
+
 		.beginClass <ARDOUR::LuaAPI::Vamp> ("Vamp")
 		.addConstructor <void (*) (const std::string&, float)> ()
 		.addStaticFunction ("list_plugins", &ARDOUR::LuaAPI::Vamp::list_plugins)
@@ -2028,6 +2031,13 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("to_int", &DSP::DspShm::to_int)
 		.addFunction ("atomic_set_int", &DSP::DspShm::atomic_set_int)
 		.addFunction ("atomic_get_int", &DSP::DspShm::atomic_get_int)
+		.endClass ()
+
+		.beginClass <DSP::EnvFollower> ("EnvFollower")
+		.addConstructor<void (*) (double, double, double)> ()
+		.addFunction ("process_bufs", &DSP::EnvFollower::process_bufs)
+		.addFunction ("process", &DSP::EnvFollower::process)
+		.addFunction ("value", &DSP::EnvFollower::value)
 		.endClass ()
 
 		.endNamespace () // DSP

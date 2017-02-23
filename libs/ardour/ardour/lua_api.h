@@ -300,7 +300,11 @@ namespace ARDOUR { namespace LuaAPI {
 	boost::shared_ptr<Evoral::Note<Evoral::Beats> >
 		new_noteptr (uint8_t, Evoral::Beats, Evoral::Beats, uint8_t, uint8_t);
 
-} } /* namespace */
+	double control_value (const Evoral::ControlSet::Controls& ctrlmap, uint32_t port);
+	bool set_control (const Evoral::ControlSet::Controls& ctrlmap, uint32_t port, double value);
+	bool modulate_control (const Evoral::ControlSet::Controls& ctrlmap, uint32_t port, double value, double baseline, double depth);
+
+} } /* namespace ARDOUR::LuaAPI */
 
 namespace ARDOUR { namespace LuaOSC {
 	/** OSC transmitter
